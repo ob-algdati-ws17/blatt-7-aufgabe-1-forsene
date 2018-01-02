@@ -1,0 +1,11 @@
+language: cpp
+
+compliler: clang
+
+
+script:
+  - mkdir build
+  - cd build
+  - cmake ..
+  - make
+  - make test
