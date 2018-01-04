@@ -46,15 +46,9 @@ void AVLTree::insert(const int value, AVLTree::Node *n) {
             insert(value, n->left);
         } else {
             n->left = new Node(n, value);
-            if (n->balance == 1) {
-                n->balance = 0;
-            }
-            if (n->balance == 0) {
-                n->balance = -1;
-                upin(n);
-            }
+            n->balance -= 1;
         }
-
+        if (n->balance == -1) upin(n);
     } else if (n->key == value) {
         return;
     } else {
@@ -62,49 +56,43 @@ void AVLTree::insert(const int value, AVLTree::Node *n) {
             insert(value, n->right);
         } else {
             n->right = new Node(n, value);
-            if (n->balance == -1) {
-                n->balance = 0;
-            }
-            if (n->balance == 0) {
-                n->balance = 1;
-                upin(n);
-            }
+            n->balance += 1;
+            if (n->balance == 1) upin(n);
         }
     }
 }
 
 void AVLTree::upin(AVLTree::Node *n) {
-    if(n->prev != nullptr) {
-        if (n->balance == -1) {
+    if(n!= nullptr && n->prev != nullptr) {
+        auto tmpPrev = n->prev;
+        if (n == tmpPrev->left) {
             //grew left
-            if (n->prev->balance == 1) {
-                n->prev->balance = 0;
+            if (tmpPrev->balance == 1) {
+                tmpPrev->balance = 0;
             } else if (n->prev->balance == 0) {
-                n->prev->balance = -1;
-                upin(n);
+                tmpPrev->balance = -1;
+                upin(tmpPrev);
             } else {
-                if (n->prev->balance == -1) {
-                    rotateRight(n->prev);
+                if (n->balance == -1) {
+                    rotateRight(tmpPrev);
                 } else {
                     rotateLeft(n);
-                    rotateRight(n->prev);
+                    rotateRight(tmpPrev);
                 }
             }
-        } else if (n->balance == 0) {
-            upin(n);
         } else {
             // grew right
-            if (n->prev->balance == -1) {
-                n->prev->balance = 0;
+            if (tmpPrev->balance == -1) {
+                tmpPrev->balance = 0;
             } else if (n->prev->balance == 0) {
-                n->prev->balance = 1;
-                upin(n);
+                tmpPrev->balance = 1;
+                upin(tmpPrev);
             } else {
-                if (n->prev->balance == 1) {
-                    rotateLeft(n->prev);
+                if (n->balance == 1) {
+                    rotateLeft(tmpPrev);
                 } else {
                     rotateRight(n);
-                    rotateLeft(n->prev);
+                    rotateLeft(tmpPrev);
                 }
             }
         }

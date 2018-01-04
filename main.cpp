@@ -3,8 +3,11 @@
 
 int main() {
     AVLTree a;
-    a.insert(15);
-    a.insert(25);
-    a.insert(35);
+    a.insert(2);
+    a.insert(5);
+    a.insert(1);
+    a.insert(6);
+    a.insert(3);
+    a.insert(4);
     cout << a;
 }
