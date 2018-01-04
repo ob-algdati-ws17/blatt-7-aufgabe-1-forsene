@@ -12,20 +12,27 @@ private:
 
     struct Node {
         Node *prev = nullptr;
-        const int key;
+        int key;
         Node *left = nullptr;
         Node *right = nullptr;
-        int balance;
-        Node(const int key);
-        Node(const int, Node *, Node *);
+        int balance = 0;
+        Node(Node *prev, const int key);
+        Node(Node *prev, const int, Node *left, Node *right);
         ~Node();
-
+        bool search(const int) const;
+        void insert(const int);
         vector<int> *preorder() const;  // (Hauptreihenfolge)
         vector<int> *inorder() const;   // (Symmetrische Reihenfolge)
         vector<int> *postorder() const; // (Nebenreihenfolge)
     };
 
     Node *root = nullptr;
+
+    static void upin(Node *p);
+
+    static void rotateRight(Node *p);
+
+    static void rotateLeft(Node *p);
 
 public:
 

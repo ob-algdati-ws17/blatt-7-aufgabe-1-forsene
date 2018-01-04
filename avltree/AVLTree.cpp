@@ -2,6 +2,159 @@
 #include <functional>
 
 /********************************************************************
+ * Search
+ *******************************************************************/
+
+bool AVLTree::search(const int value) const {
+    if (root == nullptr) {
+        return false;
+    }
+    return root->search(value);
+}
+
+bool AVLTree::Node::search(const int value) const {
+    if (key > value) {
+        if (left != nullptr) {
+            return left->search(value);
+        }
+        return false;
+    } else if (key == value) {
+        return true;
+    } else {
+        if (right != nullptr) {
+            return right->search(value);
+        }
+        return false;
+    }
+}
+
+/********************************************************************
+ * Insert
+ *******************************************************************/
+
+void AVLTree::insert(const int value) {
+    if (root == nullptr) {
+        root = new Node(nullptr, value);
+    } else {
+        root->insert(value);
+    }
+}
+
+void AVLTree::Node::insert(const int value) {
+    if (key > value) {
+        if (left != nullptr) {
+            left->insert(value);
+        }
+        left = new Node(this, value);
+        if (balance == 1) {
+            balance = 0;
+        }
+        if (balance == 0) {
+            balance = -1;
+            upin(this);
+        }
+    } else if (key == value) {
+        return;
+    } else {
+        if (right != nullptr) {
+            right->insert(value);
+        }
+        right = new Node(this, value);
+        if (balance == -1) {
+            balance = 0;
+        }
+        if (balance == 0) {
+            balance = 1;
+            upin(this);
+        }
+    }
+}
+
+void AVLTree::upin(AVLTree::Node *p) {
+    if(p != nullptr && p->prev != nullptr) {
+        if (p->balance = -1) {
+            //grew left
+            if (p->prev->balance == 1) {
+                p->prev->balance = 0;
+            } else if (p->prev->balance == 0) {
+                p->prev->balance = -1;
+                upin(p->prev);
+            } else {
+                if (p->balance = -1) {
+                    rotateRight(p->prev);
+                } else {
+                    rotateLeft(p);
+                    rotateRight(p->prev);
+                }
+            }
+        } else {
+            // grew right
+            if (p->prev->balance == 1) {
+                p->prev->balance = 0;
+            } else if (p->prev->balance == 0) {
+                p->prev->balance = -1;
+                upin(p->prev);
+            } else {
+                if (p->balance = -1) {
+                    rotateLeft(p->prev);
+                } else {
+                    rotateRight(p);
+                    rotateLeft(p->prev);
+                }
+            }
+        }
+    }
+}
+
+/********************************************************************
+ * Rotations
+ *******************************************************************/
+
+void AVLTree::rotateRight(AVLTree::Node *p) {
+    auto tmpLeft = p->left;
+    auto tmpPrev = p->prev;
+
+    p->left = p->left->right;
+    if (p->left != nullptr) p->left->prev = p;
+    p->prev = tmpLeft;
+
+    tmpLeft->right = p;
+    tmpLeft->prev = tmpPrev;
+    if (tmpPrev != nullptr) {
+        if(tmpPrev->left == p) {
+            tmpPrev->left = tmpLeft;
+        } else {
+            tmpPrev->right = tmpLeft;
+        }
+    }
+
+    tmpLeft->balance += 1;
+    p->balance += 1;
+}
+
+void AVLTree::rotateLeft(AVLTree::Node *p) {
+    auto tmpRight = p->left;
+    auto tmpPrev = p->prev;
+
+    p->right = p->right->left;
+    if (p->right != nullptr) p->right->prev = p;
+    p->prev = tmpRight;
+
+    tmpRight->left = p;
+    tmpRight->prev = tmpPrev;
+    if (tmpPrev != nullptr) {
+        if(tmpPrev->left == p) {
+            tmpPrev->left = tmpRight;
+        } else {
+            tmpPrev->right = tmpRight;
+        }
+    }
+
+    tmpRight->balance -= 1;
+    p->balance -= 1;
+}
+
+/********************************************************************
  * Traversal
  *******************************************************************/
 
@@ -106,3 +259,34 @@ std::ostream &operator<<(std::ostream &os, const AVLTree &tree) {
     os << "}" << endl;
     return os;
 }
+
+/********************************************************************
+ * Node constructors destructors
+ *******************************************************************/
+
+AVLTree::Node::Node(Node *p, const int k) : key(k) {
+    prev = p;
+}
+
+AVLTree::Node::Node(Node *p, const int k, Node *l, Node *r) : key(k) {
+    prev = p;
+    left = l;
+    right = r;
+}
+
+AVLTree::Node::~Node() {
+    delete left;
+    delete right;
+}
+
+/********************************************************************
+ * Tree destructor
+ *******************************************************************/
+
+AVLTree::~AVLTree() {
+    delete root;
+}
+
+
+
+
