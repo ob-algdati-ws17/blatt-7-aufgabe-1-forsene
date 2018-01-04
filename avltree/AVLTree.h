@@ -19,8 +19,6 @@ private:
         Node(Node *prev, const int key);
         Node(Node *prev, const int, Node *left, Node *right);
         ~Node();
-        bool search(const int) const;
-        void insert(const int);
         vector<int> *preorder() const;  // (Hauptreihenfolge)
         vector<int> *inorder() const;   // (Symmetrische Reihenfolge)
         vector<int> *postorder() const; // (Nebenreihenfolge)
@@ -28,11 +26,11 @@ private:
 
     Node *root = nullptr;
 
-    static void upin(Node *p);
-
-    static void rotateRight(Node *p);
-
-    static void rotateLeft(Node *p);
+    bool search(const int, Node *) const;
+    void insert(const int, Node *);
+    void upin(Node *);
+    void rotateRight(Node *);
+    void rotateLeft(Node *);
 
 public:
 

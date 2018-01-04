@@ -9,20 +9,20 @@ bool AVLTree::search(const int value) const {
     if (root == nullptr) {
         return false;
     }
-    return root->search(value);
+    return search(value, root);
 }
 
-bool AVLTree::Node::search(const int value) const {
-    if (key > value) {
-        if (left != nullptr) {
-            return left->search(value);
+bool AVLTree::search(const int value, AVLTree::Node *n) const {
+    if (n->key > value) {
+        if (n->left != nullptr) {
+            return search(value, n->left);
         }
         return false;
-    } else if (key == value) {
+    } else if (n->key == value) {
         return true;
     } else {
         if (right != nullptr) {
-            return right->search(value);
+            return search(value, n->right);
         }
         return false;
     }
@@ -36,70 +36,75 @@ void AVLTree::insert(const int value) {
     if (root == nullptr) {
         root = new Node(nullptr, value);
     } else {
-        root->insert(value);
+        insert(value, root);
     }
 }
 
-void AVLTree::Node::insert(const int value) {
-    if (key > value) {
-        if (left != nullptr) {
-            left->insert(value);
+void AVLTree::insert(const int value, AVLTree::Node *n) {
+    if (n->key > value) {
+        if (n->left != nullptr) {
+            insert(value, n->left);
+        } else {
+            n->left = new Node(n, value);
+            if (n->balance == 1) {
+                n->balance = 0;
+            }
+            if (n->balance == 0) {
+                n->balance = -1;
+                upin(n);
+            }
         }
-        left = new Node(this, value);
-        if (balance == 1) {
-            balance = 0;
-        }
-        if (balance == 0) {
-            balance = -1;
-            upin(this);
-        }
-    } else if (key == value) {
+
+    } else if (n->key == value) {
         return;
     } else {
-        if (right != nullptr) {
-            right->insert(value);
-        }
-        right = new Node(this, value);
-        if (balance == -1) {
-            balance = 0;
-        }
-        if (balance == 0) {
-            balance = 1;
-            upin(this);
+        if (n->right != nullptr) {
+            insert(value, n->right);
+        } else {
+            n->right = new Node(n, value);
+            if (n->balance == -1) {
+                n->balance = 0;
+            }
+            if (n->balance == 0) {
+                n->balance = 1;
+                upin(n);
+            }
         }
     }
 }
 
-void AVLTree::upin(AVLTree::Node *p) {
-    if(p != nullptr && p->prev != nullptr) {
-        if (p->balance = -1) {
+void AVLTree::upin(AVLTree::Node *n) {
+    if(n->prev != nullptr) {
+        if (n->balance == -1) {
             //grew left
-            if (p->prev->balance == 1) {
-                p->prev->balance = 0;
-            } else if (p->prev->balance == 0) {
-                p->prev->balance = -1;
-                upin(p->prev);
+            if (n->prev->balance == 1) {
+                n->prev->balance = 0;
+            } else if (n->prev->balance == 0) {
+                n->prev->balance = -1;
+                upin(n);
             } else {
-                if (p->balance = -1) {
-                    rotateRight(p->prev);
+                if (n->prev->balance == -1) {
+                    rotateRight(n->prev);
                 } else {
-                    rotateLeft(p);
-                    rotateRight(p->prev);
+                    rotateLeft(n);
+                    rotateRight(n->prev);
                 }
             }
+        } else if (n->balance == 0) {
+            upin(n);
         } else {
             // grew right
-            if (p->prev->balance == 1) {
-                p->prev->balance = 0;
-            } else if (p->prev->balance == 0) {
-                p->prev->balance = -1;
-                upin(p->prev);
+            if (n->prev->balance == -1) {
+                n->prev->balance = 0;
+            } else if (n->prev->balance == 0) {
+                n->prev->balance = 1;
+                upin(n);
             } else {
-                if (p->balance = -1) {
-                    rotateLeft(p->prev);
+                if (n->prev->balance == 1) {
+                    rotateLeft(n->prev);
                 } else {
-                    rotateRight(p);
-                    rotateLeft(p->prev);
+                    rotateRight(n);
+                    rotateLeft(n->prev);
                 }
             }
         }
@@ -110,48 +115,52 @@ void AVLTree::upin(AVLTree::Node *p) {
  * Rotations
  *******************************************************************/
 
-void AVLTree::rotateRight(AVLTree::Node *p) {
-    auto tmpLeft = p->left;
-    auto tmpPrev = p->prev;
+void AVLTree::rotateRight(AVLTree:: Node *n) {
+    auto tmpLeft = n->left;
+    auto tmpPrev = n->prev;
 
-    p->left = p->left->right;
-    if (p->left != nullptr) p->left->prev = p;
-    p->prev = tmpLeft;
+    n->left = n->left->right;
+    if (n->left != nullptr) n->left->prev = n;
+    n->prev = tmpLeft;
 
-    tmpLeft->right = p;
+    tmpLeft->right = n;
     tmpLeft->prev = tmpPrev;
     if (tmpPrev != nullptr) {
-        if(tmpPrev->left == p) {
+        if(tmpPrev->left == n) {
             tmpPrev->left = tmpLeft;
         } else {
             tmpPrev->right = tmpLeft;
         }
+    } else {
+        root = tmpLeft;
     }
 
     tmpLeft->balance += 1;
-    p->balance += 1;
+    n->balance += 1;
 }
 
-void AVLTree::rotateLeft(AVLTree::Node *p) {
-    auto tmpRight = p->left;
-    auto tmpPrev = p->prev;
+void AVLTree::rotateLeft(AVLTree:: Node *n) {
+    auto tmpRight = n->right;
+    auto tmpPrev = n->prev;
 
-    p->right = p->right->left;
-    if (p->right != nullptr) p->right->prev = p;
-    p->prev = tmpRight;
+    n->right = n->right->left;
+    if (n->right != nullptr) n->right->prev = n;
+    n->prev = tmpRight;
 
-    tmpRight->left = p;
+    tmpRight->left = n;
     tmpRight->prev = tmpPrev;
     if (tmpPrev != nullptr) {
-        if(tmpPrev->left == p) {
+        if(tmpPrev->left == n) {
             tmpPrev->left = tmpRight;
         } else {
             tmpPrev->right = tmpRight;
         }
+    } else {
+        root = tmpRight;
     }
 
     tmpRight->balance -= 1;
-    p->balance -= 1;
+    n->balance -= 1;
 }
 
 /********************************************************************
@@ -286,6 +295,7 @@ AVLTree::Node::~Node() {
 AVLTree::~AVLTree() {
     delete root;
 }
+
 
 
 
