@@ -82,9 +82,9 @@ void AVLTree::remove(const int value, AVLTree::Node *n) {
         if (n->left == nullptr && n->right == nullptr) {
             removeTwoLeaves(n);
         } else if (n->left == nullptr) {
-            removeOneLeaf(n, true);
-        } else if (n->right == nullptr) {
             removeOneLeaf(n, false);
+        } else if (n->right == nullptr) {
+            removeOneLeaf(n, true);
         } else {
             removeLeafless(n);
         }
@@ -100,11 +100,12 @@ void AVLTree::removeTwoLeaves(AVLTree::Node *n) {
     if(n->prev != nullptr) {
         if(n == n->prev->left) {
             n->prev->left = nullptr;
-            n->prev->balance += 1;
+            n->prev->balance++;
         } else {
             n->prev->right = nullptr;
-            n->prev->balance -= 1;
+            n->prev->balance--;
         }
+
 
         // if abs(balance) != 1, further action is necessary
         if(n->prev->balance == 0) {
@@ -142,7 +143,12 @@ void AVLTree::removeTwoLeaves(AVLTree::Node *n) {
 }
 
 void AVLTree::removeOneLeaf(AVLTree::Node *n, bool leftSide) {
+
     if (n->prev != nullptr) {
+        n->key = leftSide ? n->left->key : n->right->key;
+        n->balance = 0;
+
+        /*
         if(n->prev->left == n) {
             if(leftSide) {
                 n->prev->left = n->left;
@@ -157,7 +163,7 @@ void AVLTree::removeOneLeaf(AVLTree::Node *n, bool leftSide) {
                 n->prev->right = n->right;
             }
             n->prev->balance--;
-        }
+        }*/
     } else {
         if(leftSide) {
             root = n->left;
@@ -166,11 +172,11 @@ void AVLTree::removeOneLeaf(AVLTree::Node *n, bool leftSide) {
         }
     }
 
-    upout(n->prev);
+    upout(n);
 
     n->left = nullptr;
     n->right = nullptr;
-    delete n;
+    delete (leftSide? n->left : n->right);
 }
 
 void AVLTree::removeLeafless(AVLTree::Node *n) {
@@ -206,7 +212,6 @@ void AVLTree::removeLeafless(AVLTree::Node *n) {
 
 
 void AVLTree::upin(AVLTree::Node *n) {
-    std::cout << n->key <<endl;
     if(n!= nullptr && n->prev != nullptr) {
         auto tmpPrev = n->prev;
         if (n == tmpPrev->left) {
@@ -268,7 +273,7 @@ void AVLTree::upout(AVLTree::Node *n) {
                 tmpPrev->balance--;
             } else {
                 if(tmpPrev->left->balance == 1) {
-                    rotateLeft(tmpPrev->right);
+                    rotateLeft(tmpPrev->left);
                     rotateRight(tmpPrev);
                     upout(tmpPrev->prev);
                 } else if(tmpPrev->left->balance == 0){
