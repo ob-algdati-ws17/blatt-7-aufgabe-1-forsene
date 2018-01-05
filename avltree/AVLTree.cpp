@@ -147,23 +147,6 @@ void AVLTree::removeOneLeaf(AVLTree::Node *n, bool leftSide) {
     if (n->prev != nullptr) {
         n->key = leftSide ? n->left->key : n->right->key;
         n->balance = 0;
-
-        /*
-        if(n->prev->left == n) {
-            if(leftSide) {
-                n->prev->left = n->left;
-            } else {
-                n->prev->left = n->right;
-            }
-            n->prev->balance++;
-        } else {
-            if(leftSide) {
-                n->prev->right = n->left;
-            } else {
-                n->prev->right = n->right;
-            }
-            n->prev->balance--;
-        }*/
     } else {
         if(leftSide) {
             root = n->left;
@@ -184,25 +167,8 @@ void AVLTree::removeLeafless(AVLTree::Node *n) {
     while (fol->left != nullptr) {
         fol = fol->left;
     }
-    auto folKey = fol->key;
-    remove(folKey, fol);
-    auto replacement = new Node(n->prev, n->key, n->left, n->right);
-    replacement->balance = n->balance;
-
-    if(n->prev != nullptr) {
-        if(n == n->prev->left) {
-            n->prev->left = replacement;
-        } else {
-            n->prev->right = replacement;
-        }
-    } else {
-        root = replacement;
-    }
-
-    n->left = nullptr;
-    n->right = nullptr;
-
-    delete n;
+    n->key = fol->key;
+    remove(fol->key, fol);
 }
 
 /********************************************************************
