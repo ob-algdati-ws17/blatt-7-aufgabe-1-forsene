@@ -62,6 +62,148 @@ void AVLTree::insert(const int value, AVLTree::Node *n) {
     }
 }
 
+/********************************************************************
+ * Remove
+ *******************************************************************/
+
+void AVLTree::remove(const int value) {
+    if (root != nullptr) {
+        remove(value, root);
+    }
+}
+
+void AVLTree::remove(const int value, AVLTree::Node *n) {
+    if (n->key > value) {
+        if (n->left != nullptr) {
+            remove(value, n->left);
+        }
+        return;
+    } else if (n->key == value) {
+        if (n->left == nullptr && n->right == nullptr) {
+            removeTwoLeaves(n);
+        } else if (n->left == nullptr) {
+            removeOneLeaf(n, true);
+        } else if (n->right == nullptr) {
+            removeOneLeaf(n, false);
+        } else {
+            removeLeafless(n);
+        }
+    } else {
+        if (right != nullptr) {
+            remove(value, n->right);
+        }
+    }
+}
+
+void AVLTree::removeTwoLeaves(AVLTree::Node *n) {
+    // remove and update previous balance
+    if(n->prev != nullptr) {
+        if(n == n->prev->left) {
+            n->prev->left = nullptr;
+            n->prev->balance += 1;
+        } else {
+            n->prev->right = nullptr;
+            n->prev->balance -= 1;
+        }
+
+        // if abs(balance) != 1, further action is necessary
+        if(n->prev->balance == 0) {
+            upout(n->prev);
+        } else if(n->prev->balance == -2) {
+            //left tree height was 2
+            auto tmpPrev = n->prev;
+            if(tmpPrev->left->left == nullptr) {
+                rotateLeft(tmpPrev->left);
+                rotateRight(tmpPrev);
+            } else {
+                rotateRight(tmpPrev);
+            }
+            if(tmpPrev->balance == 0) {
+                upout(tmpPrev);
+            }
+        } else if(n->prev->balance == 2) {
+            //right tree height was 2
+            auto tmpPrev = n->prev;
+            if (tmpPrev->right->right == nullptr) {
+                rotateRight(tmpPrev->right);
+                rotateLeft(tmpPrev);
+            } else {
+                rotateLeft(tmpPrev);
+            }
+            if (tmpPrev->balance == 0) {
+                upout(tmpPrev);
+            }
+        }
+    } else {
+        root = nullptr;
+    }
+
+    delete n;
+}
+
+void AVLTree::removeOneLeaf(AVLTree::Node *n, bool leftSide) {
+    if (n->prev != nullptr) {
+        if(n->prev->left == n) {
+            if(leftSide) {
+                n->prev->left = n->left;
+            } else {
+                n->prev->left = n->right;
+            }
+            n->prev->balance++;
+        } else {
+            if(leftSide) {
+                n->prev->right = n->left;
+            } else {
+                n->prev->right = n->right;
+            }
+            n->prev->balance--;
+        }
+    } else {
+        if(leftSide) {
+            root = n->left;
+        } else {
+            root = n->right;
+        }
+    }
+
+    upout(n->prev);
+
+    n->left = nullptr;
+    n->right = nullptr;
+    delete n;
+}
+
+void AVLTree::removeLeafless(AVLTree::Node *n) {
+    auto fol = n->right;
+    while (fol->left != nullptr) {
+        fol = fol->left;
+    }
+    auto folKey = fol->key;
+    remove(folKey, fol);
+    auto replacement = new Node(n->prev, n->key, n->left, n->right);
+    replacement->balance = n->balance;
+
+    if(n->prev != nullptr) {
+        if(n == n->prev->left) {
+            n->prev->left = replacement;
+        } else {
+            n->prev->right = replacement;
+        }
+    } else {
+        root = replacement;
+    }
+
+    n->left = nullptr;
+    n->right = nullptr;
+
+    delete n;
+}
+
+/********************************************************************
+ * Rebalance Methods
+ *******************************************************************/
+
+
 void AVLTree::upin(AVLTree::Node *n) {
     if(n!= nullptr && n->prev != nullptr) {
         auto tmpPrev = n->prev;
@@ -93,6 +235,51 @@ void AVLTree::upin(AVLTree::Node *n) {
                 } else {
                     rotateRight(n);
                     rotateLeft(tmpPrev);
+                }
+            }
+        }
+    }
+}
+
+void AVLTree::upout(AVLTree::Node *n) {
+    if(n != nullptr && n->prev != nullptr) {
+        auto tmpPrev = n->prev;
+        if(n == tmpPrev->left) {
+            // removed from left tree
+            if(tmpPrev->balance == -1) {
+                tmpPrev->balance++;
+                upout(tmpPrev);
+            } else if(tmpPrev->balance == 0) {
+                tmpPrev->balance++;
+            } else {
+                if(tmpPrev->right->balance == -1) {
+                    rotateRight(tmpPrev->right);
+                    rotateLeft(tmpPrev);
+                    upout(tmpPrev->prev);
+                } else if(tmpPrev->right->balance == 0){
+                    rotateLeft(tmpPrev);
+                } else {
+                    rotateLeft(tmpPrev);
+                    upout(tmpPrev->prev);
+                }
+            }
+        } else if(n == tmpPrev->right) {
+            // removed from right tree
+            if(tmpPrev->balance == 1) {
+                tmpPrev->balance--;
+                upout(tmpPrev);
+            } else if(tmpPrev->balance == 0) {
+                tmpPrev->balance--;
+            } else {
+                if(tmpPrev->left->balance == 1) {
+                    rotateLeft(tmpPrev->right);
+                    rotateRight(tmpPrev);
+                    upout(tmpPrev->prev);
+                } else if(tmpPrev->left->balance == 0){
+                    rotateRight(tmpPrev);
+                } else {
+                    rotateRight(tmpPrev);
+                    upout(tmpPrev->prev);
                 }
             }
         }
@@ -283,6 +470,13 @@ AVLTree::Node::~Node() {
 AVLTree::~AVLTree() {
     delete root;
 }
+
+
+
+
+
+
+
 
 
 

@@ -28,7 +28,12 @@ private:
 
     bool search(const int, Node *) const;
     void insert(const int, Node *);
+    void remove(const int, Node *);
     void upin(Node *);
+    void upout(Node *);
+    void removeTwoLeaves(Node *);
+    void removeOneLeaf(Node *, bool);
+    void removeLeafless(Node *);
     void rotateRight(Node *);
     void rotateLeft(Node *);
 
