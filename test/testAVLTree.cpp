@@ -558,3 +558,67 @@ TEST(AVLTreeTest, RemoveRootNoLeaves) {
     EXPECT_THAT(*a.inorder(), testing::ElementsAre(4,6));
     EXPECT_THAT(*a.postorder(), testing::ElementsAre(4,6));
 }
+
+TEST(AVLTreeTest, RemoveNodeNoLeaves) {
+    AVLTree a;
+    a.insert(5);
+    a.insert(2);
+    a.insert(7);
+    a.insert(1);
+    a.insert(4);
+    a.insert(6);
+    a.insert(10);
+    a.insert(3);
+    a.insert(8);
+    a.insert(11);
+    EXPECT_TRUE(a.search(1));
+    EXPECT_TRUE(a.search(2));
+    EXPECT_TRUE(a.search(3));
+    EXPECT_TRUE(a.search(4));
+    EXPECT_TRUE(a.search(5));
+    EXPECT_TRUE(a.search(6));
+    EXPECT_TRUE(a.search(7));
+    EXPECT_TRUE(a.search(8));
+    EXPECT_TRUE(a.search(10));
+    EXPECT_TRUE(a.search(11));
+    a.remove(7);
+    EXPECT_THAT(*a.preorder(), testing::ElementsAre(5,2,1,4,3,8,6,10,11));
+    EXPECT_THAT(*a.inorder(), testing::ElementsAre(1,2,3,4,5,6,8,10,11));
+    EXPECT_THAT(*a.postorder(), testing::ElementsAre(1,3,4,2,6,11,10,8,5));
+}
+
+TEST(AVLTreeTest, RemoveNodeNoLeavesDoubleRotation) {
+    AVLTree a;
+
+    a.insert(3);
+    a.insert(1);
+    a.insert(6);
+    a.insert(0);
+    a.insert(2);
+    a.insert(4);
+    a.insert(9);
+    a.insert(-1);
+    a.insert(5);
+    a.insert(7);
+    a.insert(10);
+    a.insert(8);
+    EXPECT_TRUE(a.search(-1));
+    EXPECT_TRUE(a.search(0));
+    EXPECT_TRUE(a.search(1));
+    EXPECT_TRUE(a.search(2));
+    EXPECT_TRUE(a.search(3));
+    EXPECT_TRUE(a.search(4));
+    EXPECT_TRUE(a.search(5));
+    EXPECT_TRUE(a.search(6));
+    EXPECT_TRUE(a.search(7));
+    EXPECT_TRUE(a.search(8));
+    EXPECT_TRUE(a.search(10));
+    a.remove(3);
+    EXPECT_FALSE(a.search(3));
+    std::vector<int> v({4,1,0,-1,2,7,6,5,9,8,10});
+    EXPECT_EQ(*a.preorder(), v);
+    std::vector<int> w({-1,0,1,2,4,5,6,7,8,9,10});
+    EXPECT_THAT(*a.inorder(), w);
+    std::vector<int> x({-1,0,2,1,5,6,8,10,9,7,4});
+    EXPECT_THAT(*a.postorder(), x);
+}
