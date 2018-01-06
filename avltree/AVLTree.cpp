@@ -13,18 +13,15 @@ bool AVLTree::search(const int value) const {
 }
 
 bool AVLTree::search(const int value, AVLTree::Node *n) const {
-    if (n->key > value) {
-        if (n->left != nullptr) {
-            return search(value, n->left);
-        }
+    if(n == nullptr) {
         return false;
+    }
+    if (n->key > value) {
+        return search(value, n->left);
     } else if (n->key == value) {
         return true;
     } else {
-        if (right != nullptr) {
-            return search(value, n->right);
-        }
-        return false;
+        return search(value, n->right);
     }
 }
 
