@@ -1,2 +1,1 @@
-# blatt-7-aufgabe-1-forsene
-blatt-7-aufgabe-1-forsene created by GitHub Classroom
+https://github.com/ob-algdati-ws17/blatt-7-aufgabe-1-forsene
