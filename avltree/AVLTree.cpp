@@ -46,7 +46,8 @@ void AVLTree::insert(const int value, AVLTree::Node *n) {
             insert(value, n->left);
         } else {
             n->left = new Node(n, value);
-            n->balance -= 1;
+            // Update balance
+            n->balance--;
             if (n->balance == -1) upin(n);
         }
     } else if (n->key == value) {
@@ -56,7 +57,8 @@ void AVLTree::insert(const int value, AVLTree::Node *n) {
             insert(value, n->right);
         } else {
             n->right = new Node(n, value);
-            n->balance += 1;
+            // Update balance
+            n->balance++;
             if (n->balance == 1) upin(n);
         }
     }
@@ -145,6 +147,7 @@ void AVLTree::removeTwoLeaves(AVLTree::Node *n) {
 void AVLTree::removeOneLeaf(AVLTree::Node *n, bool leftSide) {
 
     if (n->prev != nullptr) {
+        // grab key from the only child
         n->key = leftSide ? n->left->key : n->right->key;
         n->balance = 0;
     } else {
@@ -159,6 +162,7 @@ void AVLTree::removeOneLeaf(AVLTree::Node *n, bool leftSide) {
 
     n->left = nullptr;
     n->right = nullptr;
+    // delete child
     delete (leftSide? n->left : n->right);
 }
 
@@ -167,7 +171,9 @@ void AVLTree::removeLeafless(AVLTree::Node *n) {
     while (fol->left != nullptr) {
         fol = fol->left;
     }
+    // grab key from symmetric follower
     n->key = fol->key;
+    // remove the follower
     remove(fol->key, fol);
 }
 
@@ -179,12 +185,15 @@ void AVLTree::removeLeafless(AVLTree::Node *n) {
 
 void AVLTree::upin(AVLTree::Node *n) {
     if(n!= nullptr && n->prev != nullptr) {
+        // upin stops at root
         auto tmpPrev = n->prev;
         if (n == tmpPrev->left) {
             //grew left
             tmpPrev->balance--;
             if(tmpPrev->balance == -1) upin(tmpPrev);
+            // balance one level higher
             if(tmpPrev->balance == -2) {
+                // rotation required
                 if (n->balance == -1) {
                     rotateRight(tmpPrev);
                 } else {
@@ -193,7 +202,7 @@ void AVLTree::upin(AVLTree::Node *n) {
                 }
             }
         } else if (n==tmpPrev->right){
-            // grew right
+            // grew right, analogical to left
             tmpPrev->balance++;
             if(tmpPrev->balance == 1) upin(tmpPrev);
             if(tmpPrev->balance == 2) {
@@ -216,9 +225,11 @@ void AVLTree::upout(AVLTree::Node *n) {
             if(tmpPrev->balance == -1) {
                 tmpPrev->balance++;
                 upout(tmpPrev);
+                // height of this subtree changed
             } else if(tmpPrev->balance == 0) {
                 tmpPrev->balance++;
             } else {
+                // new balance would be +2, so rotations are needed
                 if(tmpPrev->right->balance == -1) {
                     rotateRight(tmpPrev->right);
                     rotateLeft(tmpPrev);
@@ -231,7 +242,7 @@ void AVLTree::upout(AVLTree::Node *n) {
                 }
             }
         } else if(n == tmpPrev->right) {
-            // removed from right tree
+            // removed from right tree, analogical to left
             if(tmpPrev->balance == 1) {
                 tmpPrev->balance--;
                 upout(tmpPrev);
@@ -260,11 +271,11 @@ void AVLTree::upout(AVLTree::Node *n) {
 void AVLTree::rotateRight(AVLTree:: Node *n) {
     auto tmpLeft = n->left;
     auto tmpPrev = n->prev;
-
+    // swap head to its right
     n->left = n->left->right;
     if (n->left != nullptr) n->left->prev = n;
     n->prev = tmpLeft;
-
+    // swap heads left to head
     tmpLeft->right = n;
     tmpLeft->prev = tmpPrev;
     if (tmpPrev != nullptr) {
@@ -276,12 +287,13 @@ void AVLTree::rotateRight(AVLTree:: Node *n) {
     } else {
         root = tmpLeft;
     }
-
-    tmpLeft->balance += 1;
-    n->balance += 1;
+    //adjust balances
+    tmpLeft->balance++;
+    n->balance++;
 }
 
 void AVLTree::rotateLeft(AVLTree:: Node *n) {
+    // analogical to left
     auto tmpRight = n->right;
     auto tmpPrev = n->prev;
 
@@ -301,8 +313,8 @@ void AVLTree::rotateLeft(AVLTree:: Node *n) {
         root = tmpRight;
     }
 
-    tmpRight->balance -= 1;
-    n->balance -= 1;
+    tmpRight->balance--;
+    n->balance--;
 }
 
 /********************************************************************
