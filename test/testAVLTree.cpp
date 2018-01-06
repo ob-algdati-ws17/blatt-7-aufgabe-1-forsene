@@ -468,3 +468,93 @@ TEST(AVLTreeTest, RemoveLeavesNodeRotateLeftRightNotRoot) {
     EXPECT_THAT(*a.inorder(), testing::ElementsAre(1,2,3,5,6,7,8));
     EXPECT_THAT(*a.postorder(), testing::ElementsAre(1,3,2,6,8,7,5));
 }
+
+// up to this point, upin and upout have been tested excessively and completely
+// since the other two kinds of remove are also based on upout, a small sample
+// of test will be sufficient for them
+
+TEST(AVLTreeTest, RemoveRootOneLeaf) {
+    AVLTree a;
+    a.insert(5);
+    a.insert(6);
+    EXPECT_TRUE(a.search(5));
+    EXPECT_TRUE(a.search(6));
+    a.remove(5);
+    EXPECT_FALSE(a.search(5));
+    EXPECT_TRUE(a.search(6));
+    a.insert(5);
+    a.remove(6);
+    EXPECT_FALSE(a.search(6));
+    EXPECT_TRUE(a.search(5));
+
+    EXPECT_THAT(*a.preorder(), testing::ElementsAre(5));
+    EXPECT_THAT(*a.inorder(), testing::ElementsAre(5));
+    EXPECT_THAT(*a.postorder(), testing::ElementsAre(5));
+}
+
+TEST(AVLTreeTest, RemoveOneLeafRoation) {
+    AVLTree a;
+    a.insert(11);
+    a.insert(8);
+    a.insert(15);
+    a.insert(4);
+    a.insert(10);
+    a.insert(13);
+    a.insert(16);
+    a.insert(2);
+    a.insert(6);
+    a.insert(9);
+    a.insert(12);
+    a.insert(14);
+    a.insert(17);
+    a.insert(18);
+    a.insert(1);
+    a.insert(3);
+    a.insert(5);
+    a.insert(7);
+    EXPECT_TRUE(a.search(1));
+    EXPECT_TRUE(a.search(2));
+    EXPECT_TRUE(a.search(3));
+    EXPECT_TRUE(a.search(4));
+    EXPECT_TRUE(a.search(5));
+    EXPECT_TRUE(a.search(6));
+    EXPECT_TRUE(a.search(7));
+    EXPECT_TRUE(a.search(8));
+    EXPECT_TRUE(a.search(9));
+    EXPECT_TRUE(a.search(10));
+    EXPECT_TRUE(a.search(11));
+    EXPECT_TRUE(a.search(12));
+    EXPECT_TRUE(a.search(13));
+    EXPECT_TRUE(a.search(14));
+    EXPECT_TRUE(a.search(15));
+    EXPECT_TRUE(a.search(17));
+    EXPECT_TRUE(a.search(16));
+    EXPECT_TRUE(a.search(18));
+    a.remove(10);
+    EXPECT_FALSE(a.search(10));
+    std::vector<int> v({11,4,2,1,3,8,6,5,7,9,15,13,12,14,17,16,18});
+    EXPECT_EQ(*a.preorder(), v);
+    std::vector<int> w({1,2,3,4,5,6,7,8,9,11,12,13,14,15,16,17,18});
+    EXPECT_THAT(*a.inorder(), w);
+    std::vector<int> x({1,3,2,5,7,6,9,8,4,12,14,13,16,18,17,15,11});
+    EXPECT_THAT(*a.postorder(), x);
+}
+
+TEST(AVLTreeTest, RemoveRootNoLeaves) {
+    AVLTree a;
+    a.insert(5);
+    a.insert(6);
+    a.insert(4);
+
+    EXPECT_TRUE(a.search(4));
+    EXPECT_TRUE(a.search(5));
+    EXPECT_TRUE(a.search(6));
+    a.remove(5);
+    EXPECT_TRUE(a.search(4));
+    EXPECT_FALSE(a.search(5));
+    EXPECT_TRUE(a.search(6));
+
+    EXPECT_THAT(*a.preorder(), testing::ElementsAre(6,4));
+    EXPECT_THAT(*a.inorder(), testing::ElementsAre(4,6));
+    EXPECT_THAT(*a.postorder(), testing::ElementsAre(4,6));
+}
